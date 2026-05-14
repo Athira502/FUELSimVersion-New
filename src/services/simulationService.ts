@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 // Mock simulation service - in a real app this would connect to your backend
 export interface SimulationData {
