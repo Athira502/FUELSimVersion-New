@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { OptimizationRequest } from "@/types/optimization";
 import { Eye } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@tanstack/react-router";
 
 interface OptimizationRequestsTableProps {
   requests: OptimizationRequest[];
