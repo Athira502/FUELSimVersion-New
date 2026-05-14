@@ -9,6 +9,10 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -113,7 +117,25 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col">
+            <header className="h-14 flex items-center border-b bg-background px-4">
+              <SidebarTrigger />
+              <h1 className="flex-1 text-center text-lg font-bold tracking-tight">
+                FUE Optimizer Pro
+              </h1>
+              <div className="w-7" />
+            </header>
+            <main className="flex-1 bg-muted/30">
+              <Outlet />
+            </main>
+          </div>
+        </div>
+        <Toaster />
+        <Sonner />
+      </SidebarProvider>
     </QueryClientProvider>
   );
 }

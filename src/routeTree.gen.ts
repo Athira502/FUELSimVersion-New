@@ -9,38 +9,351 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ViewLogsRouteImport } from './routes/view-logs'
+import { Route as UserOptimizationRouteImport } from './routes/user-optimization'
+import { Route as UploadStatusRouteImport } from './routes/upload-status'
+import { Route as UploadFileRouteImport } from './routes/upload-file'
+import { Route as SimulationRunRouteImport } from './routes/simulation-run'
+import { Route as RoleOptimizationRouteImport } from './routes/role-optimization'
+import { Route as ManageDataRouteImport } from './routes/manage-data'
+import { Route as LogManagementRouteImport } from './routes/log-management'
+import { Route as FueCalculationRouteImport } from './routes/fue-calculation'
+import { Route as DbConfigRouteImport } from './routes/db-config'
+import { Route as CreateSimulationRouteImport } from './routes/create-simulation'
+import { Route as AiConfigRouteImport } from './routes/ai-config'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UserOptimizationResultsRequestIdRouteImport } from './routes/user-optimization-results.$requestId'
+import { Route as SimulationRoleDetailsRoleIdRouteImport } from './routes/simulation-role-details.$roleId'
+import { Route as RoleOptimizationResultsRequestIdRouteImport } from './routes/role-optimization-results.$requestId'
+import { Route as RoleDetailsRoleIdRouteImport } from './routes/role-details.$roleId'
+import { Route as SimulationDetailsClientNameSystemNameSimulationRunIdRouteImport } from './routes/simulation-details.$clientName.$systemName.$simulationRunId'
 
+const ViewLogsRoute = ViewLogsRouteImport.update({
+  id: '/view-logs',
+  path: '/view-logs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserOptimizationRoute = UserOptimizationRouteImport.update({
+  id: '/user-optimization',
+  path: '/user-optimization',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UploadStatusRoute = UploadStatusRouteImport.update({
+  id: '/upload-status',
+  path: '/upload-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UploadFileRoute = UploadFileRouteImport.update({
+  id: '/upload-file',
+  path: '/upload-file',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulationRunRoute = SimulationRunRouteImport.update({
+  id: '/simulation-run',
+  path: '/simulation-run',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RoleOptimizationRoute = RoleOptimizationRouteImport.update({
+  id: '/role-optimization',
+  path: '/role-optimization',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManageDataRoute = ManageDataRouteImport.update({
+  id: '/manage-data',
+  path: '/manage-data',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogManagementRoute = LogManagementRouteImport.update({
+  id: '/log-management',
+  path: '/log-management',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FueCalculationRoute = FueCalculationRouteImport.update({
+  id: '/fue-calculation',
+  path: '/fue-calculation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DbConfigRoute = DbConfigRouteImport.update({
+  id: '/db-config',
+  path: '/db-config',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateSimulationRoute = CreateSimulationRouteImport.update({
+  id: '/create-simulation',
+  path: '/create-simulation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiConfigRoute = AiConfigRouteImport.update({
+  id: '/ai-config',
+  path: '/ai-config',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserOptimizationResultsRequestIdRoute =
+  UserOptimizationResultsRequestIdRouteImport.update({
+    id: '/user-optimization-results/$requestId',
+    path: '/user-optimization-results/$requestId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const SimulationRoleDetailsRoleIdRoute =
+  SimulationRoleDetailsRoleIdRouteImport.update({
+    id: '/simulation-role-details/$roleId',
+    path: '/simulation-role-details/$roleId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const RoleOptimizationResultsRequestIdRoute =
+  RoleOptimizationResultsRequestIdRouteImport.update({
+    id: '/role-optimization-results/$requestId',
+    path: '/role-optimization-results/$requestId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const RoleDetailsRoleIdRoute = RoleDetailsRoleIdRouteImport.update({
+  id: '/role-details/$roleId',
+  path: '/role-details/$roleId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulationDetailsClientNameSystemNameSimulationRunIdRoute =
+  SimulationDetailsClientNameSystemNameSimulationRunIdRouteImport.update({
+    id: '/simulation-details/$clientName/$systemName/$simulationRunId',
+    path: '/simulation-details/$clientName/$systemName/$simulationRunId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai-config': typeof AiConfigRoute
+  '/create-simulation': typeof CreateSimulationRoute
+  '/db-config': typeof DbConfigRoute
+  '/fue-calculation': typeof FueCalculationRoute
+  '/log-management': typeof LogManagementRoute
+  '/manage-data': typeof ManageDataRoute
+  '/role-optimization': typeof RoleOptimizationRoute
+  '/simulation-run': typeof SimulationRunRoute
+  '/upload-file': typeof UploadFileRoute
+  '/upload-status': typeof UploadStatusRoute
+  '/user-optimization': typeof UserOptimizationRoute
+  '/view-logs': typeof ViewLogsRoute
+  '/role-details/$roleId': typeof RoleDetailsRoleIdRoute
+  '/role-optimization-results/$requestId': typeof RoleOptimizationResultsRequestIdRoute
+  '/simulation-role-details/$roleId': typeof SimulationRoleDetailsRoleIdRoute
+  '/user-optimization-results/$requestId': typeof UserOptimizationResultsRequestIdRoute
+  '/simulation-details/$clientName/$systemName/$simulationRunId': typeof SimulationDetailsClientNameSystemNameSimulationRunIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai-config': typeof AiConfigRoute
+  '/create-simulation': typeof CreateSimulationRoute
+  '/db-config': typeof DbConfigRoute
+  '/fue-calculation': typeof FueCalculationRoute
+  '/log-management': typeof LogManagementRoute
+  '/manage-data': typeof ManageDataRoute
+  '/role-optimization': typeof RoleOptimizationRoute
+  '/simulation-run': typeof SimulationRunRoute
+  '/upload-file': typeof UploadFileRoute
+  '/upload-status': typeof UploadStatusRoute
+  '/user-optimization': typeof UserOptimizationRoute
+  '/view-logs': typeof ViewLogsRoute
+  '/role-details/$roleId': typeof RoleDetailsRoleIdRoute
+  '/role-optimization-results/$requestId': typeof RoleOptimizationResultsRequestIdRoute
+  '/simulation-role-details/$roleId': typeof SimulationRoleDetailsRoleIdRoute
+  '/user-optimization-results/$requestId': typeof UserOptimizationResultsRequestIdRoute
+  '/simulation-details/$clientName/$systemName/$simulationRunId': typeof SimulationDetailsClientNameSystemNameSimulationRunIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai-config': typeof AiConfigRoute
+  '/create-simulation': typeof CreateSimulationRoute
+  '/db-config': typeof DbConfigRoute
+  '/fue-calculation': typeof FueCalculationRoute
+  '/log-management': typeof LogManagementRoute
+  '/manage-data': typeof ManageDataRoute
+  '/role-optimization': typeof RoleOptimizationRoute
+  '/simulation-run': typeof SimulationRunRoute
+  '/upload-file': typeof UploadFileRoute
+  '/upload-status': typeof UploadStatusRoute
+  '/user-optimization': typeof UserOptimizationRoute
+  '/view-logs': typeof ViewLogsRoute
+  '/role-details/$roleId': typeof RoleDetailsRoleIdRoute
+  '/role-optimization-results/$requestId': typeof RoleOptimizationResultsRequestIdRoute
+  '/simulation-role-details/$roleId': typeof SimulationRoleDetailsRoleIdRoute
+  '/user-optimization-results/$requestId': typeof UserOptimizationResultsRequestIdRoute
+  '/simulation-details/$clientName/$systemName/$simulationRunId': typeof SimulationDetailsClientNameSystemNameSimulationRunIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/ai-config'
+    | '/create-simulation'
+    | '/db-config'
+    | '/fue-calculation'
+    | '/log-management'
+    | '/manage-data'
+    | '/role-optimization'
+    | '/simulation-run'
+    | '/upload-file'
+    | '/upload-status'
+    | '/user-optimization'
+    | '/view-logs'
+    | '/role-details/$roleId'
+    | '/role-optimization-results/$requestId'
+    | '/simulation-role-details/$roleId'
+    | '/user-optimization-results/$requestId'
+    | '/simulation-details/$clientName/$systemName/$simulationRunId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/ai-config'
+    | '/create-simulation'
+    | '/db-config'
+    | '/fue-calculation'
+    | '/log-management'
+    | '/manage-data'
+    | '/role-optimization'
+    | '/simulation-run'
+    | '/upload-file'
+    | '/upload-status'
+    | '/user-optimization'
+    | '/view-logs'
+    | '/role-details/$roleId'
+    | '/role-optimization-results/$requestId'
+    | '/simulation-role-details/$roleId'
+    | '/user-optimization-results/$requestId'
+    | '/simulation-details/$clientName/$systemName/$simulationRunId'
+  id:
+    | '__root__'
+    | '/'
+    | '/ai-config'
+    | '/create-simulation'
+    | '/db-config'
+    | '/fue-calculation'
+    | '/log-management'
+    | '/manage-data'
+    | '/role-optimization'
+    | '/simulation-run'
+    | '/upload-file'
+    | '/upload-status'
+    | '/user-optimization'
+    | '/view-logs'
+    | '/role-details/$roleId'
+    | '/role-optimization-results/$requestId'
+    | '/simulation-role-details/$roleId'
+    | '/user-optimization-results/$requestId'
+    | '/simulation-details/$clientName/$systemName/$simulationRunId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiConfigRoute: typeof AiConfigRoute
+  CreateSimulationRoute: typeof CreateSimulationRoute
+  DbConfigRoute: typeof DbConfigRoute
+  FueCalculationRoute: typeof FueCalculationRoute
+  LogManagementRoute: typeof LogManagementRoute
+  ManageDataRoute: typeof ManageDataRoute
+  RoleOptimizationRoute: typeof RoleOptimizationRoute
+  SimulationRunRoute: typeof SimulationRunRoute
+  UploadFileRoute: typeof UploadFileRoute
+  UploadStatusRoute: typeof UploadStatusRoute
+  UserOptimizationRoute: typeof UserOptimizationRoute
+  ViewLogsRoute: typeof ViewLogsRoute
+  RoleDetailsRoleIdRoute: typeof RoleDetailsRoleIdRoute
+  RoleOptimizationResultsRequestIdRoute: typeof RoleOptimizationResultsRequestIdRoute
+  SimulationRoleDetailsRoleIdRoute: typeof SimulationRoleDetailsRoleIdRoute
+  UserOptimizationResultsRequestIdRoute: typeof UserOptimizationResultsRequestIdRoute
+  SimulationDetailsClientNameSystemNameSimulationRunIdRoute: typeof SimulationDetailsClientNameSystemNameSimulationRunIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/view-logs': {
+      id: '/view-logs'
+      path: '/view-logs'
+      fullPath: '/view-logs'
+      preLoaderRoute: typeof ViewLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user-optimization': {
+      id: '/user-optimization'
+      path: '/user-optimization'
+      fullPath: '/user-optimization'
+      preLoaderRoute: typeof UserOptimizationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/upload-status': {
+      id: '/upload-status'
+      path: '/upload-status'
+      fullPath: '/upload-status'
+      preLoaderRoute: typeof UploadStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/upload-file': {
+      id: '/upload-file'
+      path: '/upload-file'
+      fullPath: '/upload-file'
+      preLoaderRoute: typeof UploadFileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulation-run': {
+      id: '/simulation-run'
+      path: '/simulation-run'
+      fullPath: '/simulation-run'
+      preLoaderRoute: typeof SimulationRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/role-optimization': {
+      id: '/role-optimization'
+      path: '/role-optimization'
+      fullPath: '/role-optimization'
+      preLoaderRoute: typeof RoleOptimizationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manage-data': {
+      id: '/manage-data'
+      path: '/manage-data'
+      fullPath: '/manage-data'
+      preLoaderRoute: typeof ManageDataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/log-management': {
+      id: '/log-management'
+      path: '/log-management'
+      fullPath: '/log-management'
+      preLoaderRoute: typeof LogManagementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fue-calculation': {
+      id: '/fue-calculation'
+      path: '/fue-calculation'
+      fullPath: '/fue-calculation'
+      preLoaderRoute: typeof FueCalculationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/db-config': {
+      id: '/db-config'
+      path: '/db-config'
+      fullPath: '/db-config'
+      preLoaderRoute: typeof DbConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-simulation': {
+      id: '/create-simulation'
+      path: '/create-simulation'
+      fullPath: '/create-simulation'
+      preLoaderRoute: typeof CreateSimulationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-config': {
+      id: '/ai-config'
+      path: '/ai-config'
+      fullPath: '/ai-config'
+      preLoaderRoute: typeof AiConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +361,65 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/user-optimization-results/$requestId': {
+      id: '/user-optimization-results/$requestId'
+      path: '/user-optimization-results/$requestId'
+      fullPath: '/user-optimization-results/$requestId'
+      preLoaderRoute: typeof UserOptimizationResultsRequestIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulation-role-details/$roleId': {
+      id: '/simulation-role-details/$roleId'
+      path: '/simulation-role-details/$roleId'
+      fullPath: '/simulation-role-details/$roleId'
+      preLoaderRoute: typeof SimulationRoleDetailsRoleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/role-optimization-results/$requestId': {
+      id: '/role-optimization-results/$requestId'
+      path: '/role-optimization-results/$requestId'
+      fullPath: '/role-optimization-results/$requestId'
+      preLoaderRoute: typeof RoleOptimizationResultsRequestIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/role-details/$roleId': {
+      id: '/role-details/$roleId'
+      path: '/role-details/$roleId'
+      fullPath: '/role-details/$roleId'
+      preLoaderRoute: typeof RoleDetailsRoleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulation-details/$clientName/$systemName/$simulationRunId': {
+      id: '/simulation-details/$clientName/$systemName/$simulationRunId'
+      path: '/simulation-details/$clientName/$systemName/$simulationRunId'
+      fullPath: '/simulation-details/$clientName/$systemName/$simulationRunId'
+      preLoaderRoute: typeof SimulationDetailsClientNameSystemNameSimulationRunIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiConfigRoute: AiConfigRoute,
+  CreateSimulationRoute: CreateSimulationRoute,
+  DbConfigRoute: DbConfigRoute,
+  FueCalculationRoute: FueCalculationRoute,
+  LogManagementRoute: LogManagementRoute,
+  ManageDataRoute: ManageDataRoute,
+  RoleOptimizationRoute: RoleOptimizationRoute,
+  SimulationRunRoute: SimulationRunRoute,
+  UploadFileRoute: UploadFileRoute,
+  UploadStatusRoute: UploadStatusRoute,
+  UserOptimizationRoute: UserOptimizationRoute,
+  ViewLogsRoute: ViewLogsRoute,
+  RoleDetailsRoleIdRoute: RoleDetailsRoleIdRoute,
+  RoleOptimizationResultsRequestIdRoute: RoleOptimizationResultsRequestIdRoute,
+  SimulationRoleDetailsRoleIdRoute: SimulationRoleDetailsRoleIdRoute,
+  UserOptimizationResultsRequestIdRoute: UserOptimizationResultsRequestIdRoute,
+  SimulationDetailsClientNameSystemNameSimulationRunIdRoute:
+    SimulationDetailsClientNameSystemNameSimulationRunIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
