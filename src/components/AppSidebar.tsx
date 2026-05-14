@@ -76,7 +76,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center justify-center py-2">
+        <div className="flex items-center justify-start py-2 px-2">
           <img
             src="/lovable-uploads/6127a027-5d08-4cb3-a06d-2bccd6710222.png"
             alt="FUE Optimizer Pro"
