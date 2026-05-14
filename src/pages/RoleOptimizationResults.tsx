@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "@tanstack/react-router";
 import Layout from "@/components/Layout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

@@ -48,7 +48,7 @@ interface RoleGroupedChange {
   }[];
 }
 
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, Link, useLocation } from "@tanstack/react-router";
 
 const SimulationDetails = () => {
   const { clientName, systemName, simulationRunId } = useParams();

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Plus, Calendar, TrendingUp, TrendingDown, Search, Loader2, AlertCircle, RefreshCw } from "lucide-react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "@tanstack/react-router";
 import Layout from "@/components/Layout";
 import {
   Select,

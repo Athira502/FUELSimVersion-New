@@ -2,7 +2,7 @@
 
 
 import React, { useState, useEffect } from "react"; 
-import { Link, useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "@tanstack/react-router"; 
 import Layout from "@/components/Layout"; 
 import FilterRoles from "@/components/FilterRoles"; 
 import RoleProfileSummary from "@/components/RoleProfileSummary"; 

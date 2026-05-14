@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useLocation } from "react-router-dom"; // Import useLocation
+import { useParams, Link, useLocation } from "@tanstack/react-router"; // Import useLocation
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
