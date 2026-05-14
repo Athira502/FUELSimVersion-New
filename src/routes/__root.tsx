@@ -121,7 +121,7 @@ function RootComponent() {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <div className="flex-1 flex flex-col">
-            <header className="h-14 flex items-center border-b bg-background px-4">
+            <header className="h-14 flex items-center border-b border-sidebar-border bg-sidebar text-sidebar-foreground px-4">
               <SidebarTrigger />
               <h1 className="flex-1 text-center text-lg font-bold tracking-tight">
                 FUE Optimizer Pro
