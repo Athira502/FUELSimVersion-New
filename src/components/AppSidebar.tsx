@@ -63,7 +63,7 @@ const sections: Array<{
     label: "Configuration",
     items: [
       { title: "AI Config", url: "/ai-config", icon: Cpu },
-      { title: "DB Config", url: "/db-config", icon: Server },
+     
     ],
   },
 ];

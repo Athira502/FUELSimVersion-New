@@ -1,9 +1,12 @@
+
+// @ts-nocheck
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Legend,
   Line,
   LineChart,
@@ -21,128 +24,167 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
+
+import { fetchAllSystems, fetchDashboard } from "@/api/overview";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Overview — FUE Optimizer Pro" },
-      { name: "description", content: "FUE license overview dashboard with KPIs, user license status, and 12-month trends." },
+      { name: "description", content: "FUE license overview dashboard." },
     ],
   }),
   component: Overview,
 });
 
-const SYSTEMS = ["All Systems", "PRD-100", "QAS-200", "DEV-300"] as const;
-type System = (typeof SYSTEMS)[number];
-
-// Stable mock data per system
-const MOCK = {
-  "All Systems": {
-    fueCount: 1842,
-    overallFue: 2150,
-    advancedFue: 980,
-    coreFue: 720,
-    selfServiceFue: 450,
-    users: {
-      "GB Advanced Use": { Active: 540, Dormant: 120, "Expired but not Locked": 45, "Locked but not Expired": 32 },
-      "GC Core Use":     { Active: 410, Dormant: 95,  "Expired but not Locked": 38, "Locked but not Expired": 22 },
-      "GD Self-Service Use": { Active: 320, Dormant: 70, "Expired but not Locked": 24, "Locked but not Expired": 14 },
-    },
-  },
-  "PRD-100": {
-    fueCount: 920,
-    overallFue: 1080,
-    advancedFue: 510,
-    coreFue: 360,
-    selfServiceFue: 210,
-    users: {
-      "GB Advanced Use": { Active: 280, Dormant: 60, "Expired but not Locked": 22, "Locked but not Expired": 18 },
-      "GC Core Use":     { Active: 210, Dormant: 48, "Expired but not Locked": 19, "Locked but not Expired": 12 },
-      "GD Self-Service Use": { Active: 160, Dormant: 35, "Expired but not Locked": 12, "Locked but not Expired": 8 },
-    },
-  },
-  "QAS-200": {
-    fueCount: 540,
-    overallFue: 640,
-    advancedFue: 280,
-    coreFue: 220,
-    selfServiceFue: 140,
-    users: {
-      "GB Advanced Use": { Active: 160, Dormant: 35, "Expired but not Locked": 14, "Locked but not Expired": 9 },
-      "GC Core Use":     { Active: 130, Dormant: 28, "Expired but not Locked": 11, "Locked but not Expired": 6 },
-      "GD Self-Service Use": { Active: 100, Dormant: 22, "Expired but not Locked": 7, "Locked but not Expired": 4 },
-    },
-  },
-  "DEV-300": {
-    fueCount: 382,
-    overallFue: 430,
-    advancedFue: 190,
-    coreFue: 140,
-    selfServiceFue: 100,
-    users: {
-      "GB Advanced Use": { Active: 100, Dormant: 25, "Expired but not Locked": 9, "Locked but not Expired": 5 },
-      "GC Core Use":     { Active: 70,  Dormant: 19, "Expired but not Locked": 8, "Locked but not Expired": 4 },
-      "GD Self-Service Use": { Active: 60, Dormant: 13, "Expired but not Locked": 5, "Locked but not Expired": 2 },
-    },
-  },
-} as const;
-
-function buildTrend() {
-  // Last 12 months ending current month
-  const now = new Date();
-  const data: { label: string; Overall: number; Advanced: number; Core: number; SelfService: number }[] = [];
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const label = d.toLocaleString("en-US", { month: "short" }) +
-      " " + String(d.getFullYear()).slice(-2);
-    const base = 1800 + Math.round(Math.sin(i / 2) * 80) + (11 - i) * 14;
-    data.push({
-      label,
-      Overall: base + 200,
-      Advanced: Math.round(base * 0.45),
-      Core: Math.round(base * 0.34),
-      SelfService: Math.round(base * 0.21),
-    });
-  }
-  return data;
-}
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const KPI_CARDS = [
-  { key: "fueCount", label: "Current FUE Count" },
-  { key: "overallFue", label: "Overall FUE" },
-  { key: "advancedFue", label: "GB Advanced Use" },
-  { key: "coreFue", label: "GC Core Use" },
-  { key: "selfServiceFue", label: "GD Self-Service Use" },
+  { key: "totalFue",     label: "Total FUE" },
+  { key: "advancedFue",  label: "GB Advanced Use FUE" },
+  { key: "coreFue",      label: "GC Core Use FUE" },
+  { key: "selfSvcFue",   label: "GD Self-Service FUE" },
+  { key: "totalUsers",   label: "Total Users" },
 ] as const;
 
+const LICENSE_COLORS: Record<string, string> = {
+  "GB Advanced Use":     "#1a56a0",
+  "GC Core Use":         "#2980b9",
+  "GD Self-Service Use": "#5dade2",
+  "Not Classified":      "#bdc3c7",
+};
+
+const EMPTY_KPI = {
+  totalFue: 0, advancedFue: 0, coreFue: 0, selfSvcFue: 0, totalUsers: 0,
+};
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
 function Overview() {
-  const [system, setSystem] = useState<System>("All Systems");
-  const data = MOCK[system];
+  const [systemsList, setSystemsList]       = useState<string[]>([]);
+  const [selectedSystem, setSelectedSystem] = useState("");
 
-  const userBars = useMemo(
-    () =>
-      (Object.keys(data.users) as Array<keyof typeof data.users>).map((k) => ({
-        type: k,
-        ...data.users[k],
-      })),
-    [data]
-  );
+  const [kpi, setKpi]           = useState(EMPTY_KPI);
+  const [userBars, setUserBars] = useState<any[]>([]);
+  const [roleBars, setRoleBars] = useState<any[]>([]);
 
-  const trend = useMemo(() => buildTrend(), []);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError]         = useState<string | null>(null);
+
+  // ── Load systems on mount ──────────────────────────────────────────────────
+  useEffect(() => {
+    fetchAllSystems()
+      .then((systems) => {
+        const names = systems.map((s) => s.SYSTEM_NAME);
+        setSystemsList(names);
+        if (names.length > 0) setSelectedSystem(names[0]);
+      })
+      .catch(() => {});
+  }, []);
+
+  // ── Fetch dashboard whenever system changes ────────────────────────────────
+  useEffect(() => {
+    if (!selectedSystem) return;
+
+    const load = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const data = await fetchDashboard(selectedSystem);
+
+        // ── KPIs ────────────────────────────────────────────────────────────
+        // Total FUE = sum of fue from user_license_distribution
+        const userDist = data.user_license_distribution;
+        const totalFue    = userDist.total_fue ?? 0;
+        const totalUsers  = userDist.total_count ?? 0;
+        const advancedFue = userDist.breakdown.find(b => b.category === "GB Advanced Use")?.fue ?? 0;
+        const coreFue     = userDist.breakdown.find(b => b.category === "GC Core Use")?.fue ?? 0;
+        const selfSvcFue  = userDist.breakdown.find(b => b.category === "GD Self-Service Use")?.fue ?? 0;
+
+        setKpi({ totalFue, advancedFue, coreFue, selfSvcFue, totalUsers });
+
+        // ── Users by License Type bar chart ─────────────────────────────────
+        // Map: Active = user_license_distribution count per license
+        //      Dormant 90 = dormant_90 count, Dormant 180 = dormant_180 count
+        //      Expired = expired_not_locked count, Locked = locked_not_expired count
+        const licenseKeys = ["GB Advanced Use", "GC Core Use", "GD Self-Service Use", "Not Classified"];
+        const shortLabels: Record<string, string> = {
+          "GB Advanced Use":     "GB Advanced",
+          "GC Core Use":         "GC Core",
+          "GD Self-Service Use": "GD Self-Service",
+          "Not Classified":      "Not Classified",
+        };
+
+        const getCount = (section: any, category: string) =>
+          section.breakdown.find((b: any) => b.category === category)?.count ?? 0;
+
+        const bars = licenseKeys
+          .map((lic) => {
+            const active  = getCount(data.user_license_distribution, lic);
+            const dormant = getCount(data.dormant_90, lic);
+            const expired = getCount(data.expired_not_locked, lic);
+            const locked  = getCount(data.locked_not_expired, lic);
+            // Only include rows that have at least some data
+            if (active + dormant + expired + locked === 0) return null;
+            return {
+              type: shortLabels[lic],
+              Active:  active,
+              Dormant: dormant,
+              Expired: expired,
+              Locked:  locked,
+            };
+          })
+          .filter(Boolean);
+
+        setUserBars(bars);
+
+        // ── Roles by License Type bar chart ─────────────────────────────────
+        const rolesBars = data.role_license_distribution.breakdown.map((item) => ({
+          name:  item.category,
+          value: item.count,
+          color: LICENSE_COLORS[item.category] ?? "#7f8c8d",
+        }));
+
+        setRoleBars(rolesBars);
+
+      } catch {
+        setError("Failed to load dashboard data.");
+        setKpi(EMPTY_KPI);
+        setUserBars([]);
+        setRoleBars([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    load();
+  }, [selectedSystem]);
 
   return (
     <div className="p-4 md:p-6 space-y-4">
-      {/* Header row: title + system filter */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
+
+      {/* ── Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
+          {isLoading && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
+          {error && !isLoading && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium">
+              {error}
+            </span>
+          )}
+        </div>
+
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">System</span>
-          <Select value={system} onValueChange={(v) => setSystem(v as System)}>
-            <SelectTrigger className="w-[180px] h-9">
-              <SelectValue />
+          <Select value={selectedSystem} onValueChange={setSelectedSystem}>
+            <SelectTrigger className="w-[160px] h-9">
+              <SelectValue placeholder="Select system" />
             </SelectTrigger>
             <SelectContent>
-              {SYSTEMS.map((s) => (
+              {systemsList.map((s) => (
                 <SelectItem key={s} value={s}>{s}</SelectItem>
               ))}
             </SelectContent>
@@ -150,68 +192,111 @@ function Overview() {
         </div>
       </div>
 
-      {/* KPI tiles */}
+      {/* ── KPI tiles ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {KPI_CARDS.map((k) => (
           <Card key={k.key} className="py-3">
             <CardContent className="p-3">
               <div className="text-xs text-muted-foreground">{k.label}</div>
               <div className="text-xl font-bold mt-1">
-                {(data[k.key as keyof typeof data] as number).toLocaleString()}
+                {isLoading
+                  ? <span className="text-muted-foreground text-base">—</span>
+                  : (kpi[k.key as keyof typeof kpi] as number).toLocaleString()
+                }
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Charts row */}
+      {/* ── Two charts ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {/* Users by License Type */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Users by License Type</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[260px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={userBars} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="type" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Bar dataKey="Active" fill="var(--color-belize-700)" />
-                  <Bar dataKey="Dormant" fill="var(--color-belize-400)" />
-                  <Bar dataKey="Expired but not Locked" fill="#e0a800" />
-                  <Bar dataKey="Locked but not Expired" fill="#c0392b" />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="h-[280px]">
+              {userBars.length === 0 && !isLoading ? (
+                <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+                  No user data available
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={userBars} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="type" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    <Bar dataKey="Active"  fill="#1a56a0" />
+                    <Bar dataKey="Dormant" fill="#5dade2" name="Dormant 90+" />
+                    <Bar dataKey="Expired" fill="#e0a800" name="Expired but not Locked" />
+                    <Bar dataKey="Locked"  fill="#c0392b" name="Locked but not Expired" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>
 
+        {/* Roles by License Type */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">FUE Trend — Last 12 Months</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Roles by License Type</CardTitle>
+              <span className="text-xs text-muted-foreground">
+                {roleBars.reduce((s, d) => s + d.value, 0).toLocaleString()} total roles
+              </span>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="h-[260px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trend} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Line type="monotone" dataKey="Overall" name="Overall FUE" stroke="var(--color-belize-800)" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="Advanced" name="Advanced Use" stroke="var(--color-belize-500)" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="Core" name="Core Use" stroke="#e0a800" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="SelfService" name="Self-Service Use" stroke="#16a085" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
+            <div className="h-[280px]">
+              {roleBars.length === 0 && !isLoading ? (
+                <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+                  No role data available
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={roleBars} margin={{ top: 8, right: 8, left: -10, bottom: 40 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 10 }}
+                      angle={-25}
+                      textAnchor="end"
+                      interval={0}
+                    />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip formatter={(value: number) => [value.toLocaleString(), "Roles"]} />
+                    <Bar dataKey="value" name="No. of Roles" radius={[4, 4, 0, 0]}>
+                      {roleBars.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>
+
       </div>
+
+      {/* ── FUE Trend placeholder ── */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">FUE Trend — Last 12 Months</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[280px] flex items-center justify-center text-sm text-muted-foreground">
+            Historical trend data not yet available from backend
+          </div>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }

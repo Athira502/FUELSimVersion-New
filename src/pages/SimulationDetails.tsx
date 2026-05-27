@@ -13,26 +13,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Loader2, AlertCircle } from "lucide-react";
+import { useParams, Link } from "@tanstack/react-router";
 
-import { getSimulationResults, SimulationChange } from "../api/result_save";
-import { getLicenseClassificationPivotTable } from '../api/simulation_api';
-
-interface TransformedSimulation {
-  id: string;
-  name: string;
-  date: string;
-  time: string;
-  simulationFue: number;
-  actualFue: number | null;
-  savings: number | null;
-  status: string;
-  changes: RoleGroupedChange[];
-  summary?: {
-    total_fue: number;
-    gb_fue: number;
-    gc_fue: number;
-  };
-}
+// Import from simulation API
+import {
+  getSimulationResults,
+  getLicenseClassificationPivotTable,
+  SimulationResultChange
+} from "@/api/simulation_api";
+import { fetchDashboard } from "@/api/overview";
 
 interface RoleGroupedChange {
   roleId: string;
@@ -49,55 +38,27 @@ interface RoleGroupedChange {
   }[];
 }
 
-import { useParams, Link, useLocation } from "@tanstack/react-router";
-
 const SimulationDetails = () => {
-  const { clientName, systemName, simulationRunId } = useParams();
-  const location = useLocation();
-  
-  const passedActualFue = location.state?.actualFue;
-  
+  const { systemName, simulationRunId } = useParams({
+    from: "/simulation-details/$systemName/$simulationRunId",
+  });
+
+  const decodedSystem = decodeURIComponent(systemName);
+  const decodedSimRunId = decodeURIComponent(simulationRunId);
+
   const [simulation, setSimulation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [actualFue, setActualFue] = useState(passedActualFue || null);
-  const [actualFueLoading, setActualFueLoading] = useState(!passedActualFue);
+  const [actualFue, setActualFue] = useState(null);
+  const [actualFueLoading, setActualFueLoading] = useState(true);
 
-  useEffect(() => {
-    if (passedActualFue) {
-      setActualFue(passedActualFue);
-      setActualFueLoading(false);
-      return;
-    }
-
-    const fetchActualFue = async () => {
-      if (!clientName || !systemName) return;
-
-      setActualFueLoading(true);
-      try {
-        const data = await getLicenseClassificationPivotTable(clientName, systemName);
-        const totalFue = data.fue_summary?.["Total FUE Required"];
-        if (totalFue !== undefined) {
-          setActualFue(totalFue);
-        }
-      } catch (err) {
-        console.error("Error fetching actual FUE:", err);
-      } finally {
-        setActualFueLoading(false);
-      }
-    };
-
-    fetchActualFue();
-  }, [clientName, systemName, passedActualFue]);
-
-  const groupChangesByRole = (changes: SimulationChange[] | undefined): RoleGroupedChange[] => {
+  const groupChangesByRole = (changes: SimulationResultChange[] | undefined): RoleGroupedChange[] => {
     if (!changes || changes.length === 0) return [];
-
+    
     const grouped: { [key: string]: RoleGroupedChange } = {};
-
+    
     changes.forEach((change, index) => {
-      const roleIdentifier = change.role || "Unknown Role";
-      
+      const roleIdentifier = change.role_name || "Unknown Role";
       if (!grouped[roleIdentifier]) {
         grouped[roleIdentifier] = {
           roleId: roleIdentifier,
@@ -107,9 +68,8 @@ const SimulationDetails = () => {
           changes: [],
         };
       }
-
       grouped[roleIdentifier].changes.push({
-        id: change.id || index + 1,
+        id: index + 1,
         authObject: change.object || "N/A",
         field: change.field || "N/A",
         valueLow: change.value_low || "",
@@ -117,31 +77,34 @@ const SimulationDetails = () => {
         operation: change.operation || "Unknown",
       });
     });
-
+    
     return Object.values(grouped);
   };
 
-
   useEffect(() => {
-    const fetchSimulationDetails = async () => {
-      if (!clientName || !systemName || !simulationRunId) {
-        setError("Missing client name, system name, or simulation run ID in URL.");
+    const loadAll = async () => {
+      if (!decodedSystem || !decodedSimRunId) {
+        setError("Missing system name or simulation run ID in URL.");
         setLoading(false);
         return;
       }
 
       setLoading(true);
+      setActualFueLoading(true);
       setError(null);
 
       try {
-        console.log("Fetching simulation details for:", {
-          clientName,
-          systemName,
-          simulationRunId
-        });
+        const [apiResponse, pivotData] = await Promise.all([
+          getSimulationResults(decodedSystem),
+          fetchDashboard(decodedSystem).catch(err => {
+            console.error("Error fetching actual FUE:", err);
+            return null;
+          }),
+        ]);
 
-        const apiResponse = await getSimulationResults(clientName, systemName);
-        console.log("API Response:", apiResponse);
+        const fetchedActualFue = pivotData?.user_license_distribution?.total_fue || 0;
+        setActualFue(fetchedActualFue);
+        setActualFueLoading(false);
 
         if (!apiResponse.results || apiResponse.results.length === 0) {
           setError("No simulation results found.");
@@ -149,107 +112,60 @@ const SimulationDetails = () => {
           return;
         }
 
-        console.log("Looking for simulation run ID (string):", simulationRunId);
-
         const foundSimulation = apiResponse.results.find(
-          (sim: any) => {
-            console.log("Comparing:", sim.simulation_run_id, "with", simulationRunId);
-            return sim.simulation_run_id === simulationRunId;
-          }
+          (sim: any) => sim.simulation_run_id === decodedSimRunId
         );
 
-        console.log("Found simulation:", foundSimulation);
-
         if (!foundSimulation) {
-          setError(`Simulation run with ID ${simulationRunId} not found.`);
+          setError(`Simulation run with ID ${decodedSimRunId} not found.`);
           setLoading(false);
           return;
         }
 
         let date;
         try {
-          if (foundSimulation.timestamp) {
-            date = new Date(foundSimulation.timestamp.replace(' ', 'T'));
-          } else {
-            date = new Date();
-          }
+          date = foundSimulation.timestamp
+            ? new Date(foundSimulation.timestamp.replace(' ', 'T'))
+            : new Date();
         } catch (e) {
-          console.warn(`Invalid timestamp format: ${foundSimulation.timestamp}`, e);
           date = new Date();
         }
 
-        const simulationFue = typeof foundSimulation.fue_required === 'string'
-          ? parseFloat(foundSimulation.fue_required)
-          : foundSimulation.fue_required || 0;
+        const simulationFue = typeof foundSimulation.total_fue === 'string'
+          ? parseFloat(foundSimulation.total_fue)
+          : foundSimulation.total_fue || 0;
 
-        const currentActualFue = actualFue || 306; 
-        const savings = currentActualFue - simulationFue;
+        const savings = fetchedActualFue - simulationFue;
 
-        // Parse summary if available
-        let summary = undefined;
-        if (foundSimulation.summary) {
-          summary = {
-            total_fue: typeof foundSimulation.summary.total_fue === 'string' 
-              ? parseFloat(foundSimulation.summary.total_fue) 
-              : foundSimulation.summary.total_fue || 0,
-            gb_fue: typeof foundSimulation.summary.gb_fue === 'string' 
-              ? parseFloat(foundSimulation.summary.gb_fue) 
-              : foundSimulation.summary.gb_fue || 0,
-            gc_fue: typeof foundSimulation.summary.gc_fue === 'string' 
-              ? parseFloat(foundSimulation.summary.gc_fue) 
-              : foundSimulation.summary.gc_fue || 0,
-          };
-        }
-
-        const transformedSimulation: TransformedSimulation = {
-          id: simulationRunId,
+        setSimulation({
+          id: decodedSimRunId,
           name: `Simulation Run ${foundSimulation.simulation_run_id}`,
           date: date.toISOString().split('T')[0],
           time: date.toTimeString().split(' ')[0].substring(0, 5),
-          simulationFue: simulationFue,
-          actualFue: currentActualFue,
-          savings: savings,
+          simulationFue,
+          actualFue: fetchedActualFue,
+          savings,
           status: "Completed",
           changes: groupChangesByRole(foundSimulation.changes),
-          summary: summary,
-        };
-
-        console.log("Transformed simulation:", transformedSimulation);
-        setSimulation(transformedSimulation);
+        });
 
       } catch (err: any) {
-        console.error("Error fetching simulation details:", err);
         setError(`Failed to load simulation details: ${err.message || 'Unknown error'}`);
       } finally {
         setLoading(false);
+        setActualFueLoading(false);
       }
     };
 
-    fetchSimulationDetails();
-  }, [clientName, systemName, simulationRunId]);
-
-  // Update savings when actualFue changes
-  useEffect(() => {
-    if (simulation && actualFue !== null) {
-      const newSavings = actualFue - simulation.simulationFue;
-      setSimulation(prev => prev ? {
-        ...prev,
-        actualFue: actualFue,
-        savings: newSavings
-      } : null);
-    }
-  }, [actualFue]);
+    loadAll();
+  }, [decodedSystem, decodedSimRunId]);
 
   const getOperationBadgeColor = (operation: string) => {
     switch (operation) {
-      case "Add":
-        return "bg-green-100 text-green-800";
-      case "Remove":
-        return "bg-red-100 text-red-800";
-      case "Change":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case "Add":    return "bg-green-100 text-green-800";
+      case "Remove": return "bg-red-100 text-red-800";
+      case "Change": return "bg-blue-100 text-blue-800";
+      default:       return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -270,7 +186,11 @@ const SimulationDetails = () => {
         <div className="flex flex-col items-center justify-center h-64 text-red-600">
           <AlertCircle className="h-12 w-12 mb-4" />
           <p className="text-xl font-semibold">{error}</p>
-          <Link to={`/simulation-run?client=${clientName}&system=${systemName}`} className="mt-4">
+          <Link
+            to="/simulation-run"
+            search={{ system: decodedSystem }}
+            className="mt-4"
+          >
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Simulation Run
             </Button>
@@ -285,7 +205,11 @@ const SimulationDetails = () => {
       <Layout title="Simulation Not Found">
         <div className="flex flex-col items-center justify-center h-64 text-gray-600">
           <p className="text-xl font-semibold">No simulation data available.</p>
-          <Link to={`/simulation-run?client=${clientName}&system=${systemName}`} className="mt-4">
+          <Link
+            to="/simulation-run"
+            search={{ system: decodedSystem }}
+            className="mt-4"
+          >
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Simulation Run
             </Button>
@@ -299,12 +223,15 @@ const SimulationDetails = () => {
     <Layout title="Simulation Details">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <Link to={`/simulation-run?client=${clientName}&system=${systemName}`} className="flex items-center text-blue-600">
+          <Link
+            to="/simulation-run"
+            search={{ system: decodedSystem }}
+            className="flex items-center text-blue-600"
+          >
             <ArrowLeft className="mr-1 h-4 w-4" /> Back to Simulation Run
           </Link>
         </div>
 
-        {/* Simulation Summary */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -323,7 +250,9 @@ const SimulationDetails = () => {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-800">
-                  {actualFueLoading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : simulation.actualFue}
+                  {actualFueLoading
+                    ? <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                    : simulation.actualFue}
                 </div>
                 <div className="text-sm text-gray-600">Actual FUE</div>
               </div>
@@ -332,20 +261,14 @@ const SimulationDetails = () => {
                   {simulation.savings !== null && simulation.savings > 0 ? (
                     <>
                       <TrendingDown className="h-5 w-5 text-green-600" />
-                      <span className="text-2xl font-bold text-green-600">
-                        {simulation.savings} FUE
-                      </span>
+                      <span className="text-2xl font-bold text-green-600">{simulation.savings} FUE</span>
                     </>
-                  ) : (
-                    simulation.savings !== null && (
-                      <>
-                        <TrendingUp className="h-5 w-5 text-red-600" />
-                        <span className="text-2xl font-bold text-red-600">
-                          {Math.abs(simulation.savings)} FUE
-                        </span>
-                      </>
-                    )
-                  )}
+                  ) : simulation.savings !== null ? (
+                    <>
+                      <TrendingUp className="h-5 w-5 text-red-600" />
+                      <span className="text-2xl font-bold text-red-600">{Math.abs(simulation.savings)} FUE</span>
+                    </>
+                  ) : null}
                 </div>
                 <div className="text-sm text-gray-600">Potential Savings</div>
               </div>
@@ -353,7 +276,6 @@ const SimulationDetails = () => {
           </CardContent>
         </Card>
 
-        {/* Changes Made */}
         <Card>
           <CardHeader>
             <CardTitle>Changes Made</CardTitle>
@@ -365,7 +287,6 @@ const SimulationDetails = () => {
               ) : (
                 simulation.changes.map((role, index) => (
                   <div key={`${role.roleId}-${index}`} className="border border-gray-200 rounded-lg p-4">
-                    {/* Role Header */}
                     <div className="mb-4 pb-3 border-b border-gray-100">
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                         <div>
@@ -384,8 +305,6 @@ const SimulationDetails = () => {
                         </div>
                       </div>
                     </div>
-
-                    {/* Changes Table */}
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader>

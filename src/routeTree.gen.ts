@@ -18,7 +18,6 @@ import { Route as RoleOptimizationRouteImport } from './routes/role-optimization
 import { Route as ManageDataRouteImport } from './routes/manage-data'
 import { Route as LogManagementRouteImport } from './routes/log-management'
 import { Route as FueCalculationRouteImport } from './routes/fue-calculation'
-import { Route as DbConfigRouteImport } from './routes/db-config'
 import { Route as CreateSimulationRouteImport } from './routes/create-simulation'
 import { Route as AiConfigRouteImport } from './routes/ai-config'
 import { Route as IndexRouteImport } from './routes/index'
@@ -26,7 +25,8 @@ import { Route as UserOptimizationResultsRequestIdRouteImport } from './routes/u
 import { Route as SimulationRoleDetailsRoleIdRouteImport } from './routes/simulation-role-details.$roleId'
 import { Route as RoleOptimizationResultsRequestIdRouteImport } from './routes/role-optimization-results.$requestId'
 import { Route as RoleDetailsRoleIdRouteImport } from './routes/role-details.$roleId'
-import { Route as SimulationDetailsClientNameSystemNameSimulationRunIdRouteImport } from './routes/simulation-details.$clientName.$systemName.$simulationRunId'
+import { Route as RoleAssignedUsersRoleIdRouteImport } from './routes/role-assigned-users.$roleId'
+import { Route as SimulationDetailsSystemNameSimulationRunIdRouteImport } from './routes/simulation-details.$systemName.$simulationRunId'
 
 const ViewLogsRoute = ViewLogsRouteImport.update({
   id: '/view-logs',
@@ -73,11 +73,6 @@ const FueCalculationRoute = FueCalculationRouteImport.update({
   path: '/fue-calculation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DbConfigRoute = DbConfigRouteImport.update({
-  id: '/db-config',
-  path: '/db-config',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CreateSimulationRoute = CreateSimulationRouteImport.update({
   id: '/create-simulation',
   path: '/create-simulation',
@@ -116,10 +111,15 @@ const RoleDetailsRoleIdRoute = RoleDetailsRoleIdRouteImport.update({
   path: '/role-details/$roleId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SimulationDetailsClientNameSystemNameSimulationRunIdRoute =
-  SimulationDetailsClientNameSystemNameSimulationRunIdRouteImport.update({
-    id: '/simulation-details/$clientName/$systemName/$simulationRunId',
-    path: '/simulation-details/$clientName/$systemName/$simulationRunId',
+const RoleAssignedUsersRoleIdRoute = RoleAssignedUsersRoleIdRouteImport.update({
+  id: '/role-assigned-users/$roleId',
+  path: '/role-assigned-users/$roleId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulationDetailsSystemNameSimulationRunIdRoute =
+  SimulationDetailsSystemNameSimulationRunIdRouteImport.update({
+    id: '/simulation-details/$systemName/$simulationRunId',
+    path: '/simulation-details/$systemName/$simulationRunId',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -127,7 +127,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ai-config': typeof AiConfigRoute
   '/create-simulation': typeof CreateSimulationRoute
-  '/db-config': typeof DbConfigRoute
   '/fue-calculation': typeof FueCalculationRoute
   '/log-management': typeof LogManagementRoute
   '/manage-data': typeof ManageDataRoute
@@ -137,17 +136,17 @@ export interface FileRoutesByFullPath {
   '/upload-status': typeof UploadStatusRoute
   '/user-optimization': typeof UserOptimizationRoute
   '/view-logs': typeof ViewLogsRoute
+  '/role-assigned-users/$roleId': typeof RoleAssignedUsersRoleIdRoute
   '/role-details/$roleId': typeof RoleDetailsRoleIdRoute
   '/role-optimization-results/$requestId': typeof RoleOptimizationResultsRequestIdRoute
   '/simulation-role-details/$roleId': typeof SimulationRoleDetailsRoleIdRoute
   '/user-optimization-results/$requestId': typeof UserOptimizationResultsRequestIdRoute
-  '/simulation-details/$clientName/$systemName/$simulationRunId': typeof SimulationDetailsClientNameSystemNameSimulationRunIdRoute
+  '/simulation-details/$systemName/$simulationRunId': typeof SimulationDetailsSystemNameSimulationRunIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ai-config': typeof AiConfigRoute
   '/create-simulation': typeof CreateSimulationRoute
-  '/db-config': typeof DbConfigRoute
   '/fue-calculation': typeof FueCalculationRoute
   '/log-management': typeof LogManagementRoute
   '/manage-data': typeof ManageDataRoute
@@ -157,18 +156,18 @@ export interface FileRoutesByTo {
   '/upload-status': typeof UploadStatusRoute
   '/user-optimization': typeof UserOptimizationRoute
   '/view-logs': typeof ViewLogsRoute
+  '/role-assigned-users/$roleId': typeof RoleAssignedUsersRoleIdRoute
   '/role-details/$roleId': typeof RoleDetailsRoleIdRoute
   '/role-optimization-results/$requestId': typeof RoleOptimizationResultsRequestIdRoute
   '/simulation-role-details/$roleId': typeof SimulationRoleDetailsRoleIdRoute
   '/user-optimization-results/$requestId': typeof UserOptimizationResultsRequestIdRoute
-  '/simulation-details/$clientName/$systemName/$simulationRunId': typeof SimulationDetailsClientNameSystemNameSimulationRunIdRoute
+  '/simulation-details/$systemName/$simulationRunId': typeof SimulationDetailsSystemNameSimulationRunIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ai-config': typeof AiConfigRoute
   '/create-simulation': typeof CreateSimulationRoute
-  '/db-config': typeof DbConfigRoute
   '/fue-calculation': typeof FueCalculationRoute
   '/log-management': typeof LogManagementRoute
   '/manage-data': typeof ManageDataRoute
@@ -178,11 +177,12 @@ export interface FileRoutesById {
   '/upload-status': typeof UploadStatusRoute
   '/user-optimization': typeof UserOptimizationRoute
   '/view-logs': typeof ViewLogsRoute
+  '/role-assigned-users/$roleId': typeof RoleAssignedUsersRoleIdRoute
   '/role-details/$roleId': typeof RoleDetailsRoleIdRoute
   '/role-optimization-results/$requestId': typeof RoleOptimizationResultsRequestIdRoute
   '/simulation-role-details/$roleId': typeof SimulationRoleDetailsRoleIdRoute
   '/user-optimization-results/$requestId': typeof UserOptimizationResultsRequestIdRoute
-  '/simulation-details/$clientName/$systemName/$simulationRunId': typeof SimulationDetailsClientNameSystemNameSimulationRunIdRoute
+  '/simulation-details/$systemName/$simulationRunId': typeof SimulationDetailsSystemNameSimulationRunIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -190,7 +190,6 @@ export interface FileRouteTypes {
     | '/'
     | '/ai-config'
     | '/create-simulation'
-    | '/db-config'
     | '/fue-calculation'
     | '/log-management'
     | '/manage-data'
@@ -200,17 +199,17 @@ export interface FileRouteTypes {
     | '/upload-status'
     | '/user-optimization'
     | '/view-logs'
+    | '/role-assigned-users/$roleId'
     | '/role-details/$roleId'
     | '/role-optimization-results/$requestId'
     | '/simulation-role-details/$roleId'
     | '/user-optimization-results/$requestId'
-    | '/simulation-details/$clientName/$systemName/$simulationRunId'
+    | '/simulation-details/$systemName/$simulationRunId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/ai-config'
     | '/create-simulation'
-    | '/db-config'
     | '/fue-calculation'
     | '/log-management'
     | '/manage-data'
@@ -220,17 +219,17 @@ export interface FileRouteTypes {
     | '/upload-status'
     | '/user-optimization'
     | '/view-logs'
+    | '/role-assigned-users/$roleId'
     | '/role-details/$roleId'
     | '/role-optimization-results/$requestId'
     | '/simulation-role-details/$roleId'
     | '/user-optimization-results/$requestId'
-    | '/simulation-details/$clientName/$systemName/$simulationRunId'
+    | '/simulation-details/$systemName/$simulationRunId'
   id:
     | '__root__'
     | '/'
     | '/ai-config'
     | '/create-simulation'
-    | '/db-config'
     | '/fue-calculation'
     | '/log-management'
     | '/manage-data'
@@ -240,18 +239,18 @@ export interface FileRouteTypes {
     | '/upload-status'
     | '/user-optimization'
     | '/view-logs'
+    | '/role-assigned-users/$roleId'
     | '/role-details/$roleId'
     | '/role-optimization-results/$requestId'
     | '/simulation-role-details/$roleId'
     | '/user-optimization-results/$requestId'
-    | '/simulation-details/$clientName/$systemName/$simulationRunId'
+    | '/simulation-details/$systemName/$simulationRunId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AiConfigRoute: typeof AiConfigRoute
   CreateSimulationRoute: typeof CreateSimulationRoute
-  DbConfigRoute: typeof DbConfigRoute
   FueCalculationRoute: typeof FueCalculationRoute
   LogManagementRoute: typeof LogManagementRoute
   ManageDataRoute: typeof ManageDataRoute
@@ -261,11 +260,12 @@ export interface RootRouteChildren {
   UploadStatusRoute: typeof UploadStatusRoute
   UserOptimizationRoute: typeof UserOptimizationRoute
   ViewLogsRoute: typeof ViewLogsRoute
+  RoleAssignedUsersRoleIdRoute: typeof RoleAssignedUsersRoleIdRoute
   RoleDetailsRoleIdRoute: typeof RoleDetailsRoleIdRoute
   RoleOptimizationResultsRequestIdRoute: typeof RoleOptimizationResultsRequestIdRoute
   SimulationRoleDetailsRoleIdRoute: typeof SimulationRoleDetailsRoleIdRoute
   UserOptimizationResultsRequestIdRoute: typeof UserOptimizationResultsRequestIdRoute
-  SimulationDetailsClientNameSystemNameSimulationRunIdRoute: typeof SimulationDetailsClientNameSystemNameSimulationRunIdRoute
+  SimulationDetailsSystemNameSimulationRunIdRoute: typeof SimulationDetailsSystemNameSimulationRunIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -333,13 +333,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FueCalculationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/db-config': {
-      id: '/db-config'
-      path: '/db-config'
-      fullPath: '/db-config'
-      preLoaderRoute: typeof DbConfigRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/create-simulation': {
       id: '/create-simulation'
       path: '/create-simulation'
@@ -389,11 +382,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RoleDetailsRoleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/simulation-details/$clientName/$systemName/$simulationRunId': {
-      id: '/simulation-details/$clientName/$systemName/$simulationRunId'
-      path: '/simulation-details/$clientName/$systemName/$simulationRunId'
-      fullPath: '/simulation-details/$clientName/$systemName/$simulationRunId'
-      preLoaderRoute: typeof SimulationDetailsClientNameSystemNameSimulationRunIdRouteImport
+    '/role-assigned-users/$roleId': {
+      id: '/role-assigned-users/$roleId'
+      path: '/role-assigned-users/$roleId'
+      fullPath: '/role-assigned-users/$roleId'
+      preLoaderRoute: typeof RoleAssignedUsersRoleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulation-details/$systemName/$simulationRunId': {
+      id: '/simulation-details/$systemName/$simulationRunId'
+      path: '/simulation-details/$systemName/$simulationRunId'
+      fullPath: '/simulation-details/$systemName/$simulationRunId'
+      preLoaderRoute: typeof SimulationDetailsSystemNameSimulationRunIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -403,7 +403,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AiConfigRoute: AiConfigRoute,
   CreateSimulationRoute: CreateSimulationRoute,
-  DbConfigRoute: DbConfigRoute,
   FueCalculationRoute: FueCalculationRoute,
   LogManagementRoute: LogManagementRoute,
   ManageDataRoute: ManageDataRoute,
@@ -413,13 +412,24 @@ const rootRouteChildren: RootRouteChildren = {
   UploadStatusRoute: UploadStatusRoute,
   UserOptimizationRoute: UserOptimizationRoute,
   ViewLogsRoute: ViewLogsRoute,
+  RoleAssignedUsersRoleIdRoute: RoleAssignedUsersRoleIdRoute,
   RoleDetailsRoleIdRoute: RoleDetailsRoleIdRoute,
   RoleOptimizationResultsRequestIdRoute: RoleOptimizationResultsRequestIdRoute,
   SimulationRoleDetailsRoleIdRoute: SimulationRoleDetailsRoleIdRoute,
   UserOptimizationResultsRequestIdRoute: UserOptimizationResultsRequestIdRoute,
-  SimulationDetailsClientNameSystemNameSimulationRunIdRoute:
-    SimulationDetailsClientNameSystemNameSimulationRunIdRoute,
+  SimulationDetailsSystemNameSimulationRunIdRoute:
+    SimulationDetailsSystemNameSimulationRunIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

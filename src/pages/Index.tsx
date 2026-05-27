@@ -106,12 +106,6 @@ const Index = () => {
               icon={Brain}
               href="/ai-config"
             />
-            <FeatureCard
-              title="DB Config"
-              description="Set up database connections and configuration settings"
-              icon={HardDrive}
-              href="/db-config"
-            />
           </div>
         </section>
       </div>

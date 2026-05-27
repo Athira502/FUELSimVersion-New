@@ -1,332 +1,185 @@
-// @ts-nocheck
 import axios from "axios";
 
+const API_BASE_URL = "http://127.0.0.1:8000";
+function buildFormData(file: File): FormData {
+  const fd = new FormData();
+  fd.append("csv_file", file);
+  return fd;
+}
 
-const API_BASE_URL = "http://localhost:8000"; 
+function endpoint(path: string, systemName: string, systemRelease: string): string {
+  return `${API_BASE_URL}${path}?system_name=${encodeURIComponent(systemName)}&system_release_info=${encodeURIComponent(systemRelease)}`;
+}
 
-export const uploadLicenseData = async (
-  clientName: string,
+// ─── Upload APIs — one per backend route ──────────────────────────────────────
+
+/**
+ * POST /data/load-agr1251
+ * Role Authorization Data (AGR_1251) — CSV
+ */
+export async function uploadAGR1251(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-agr1251", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+}
+
+/**
+ * POST /data/load-agrusers
+ * User Role Mapping Data (AGR_USERS) — CSV
+ */
+export async function uploadAGRUSERS(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-agrusers", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+}
+
+/**
+ * POST /data/load-agrdefine
+ * Master Derived Role Data (AGR_DEFINE) — CSV
+ */
+export async function uploadAGRDEFINE(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-agrdefine", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+}
+
+/**
+ * POST /data/load-agragrs
+ * Composite Role Data (AGR_AGRS) — CSV
+ */
+export async function uploadAGRAGRS(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-agragrs", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+}
+
+/**
+ * POST /data/load-usr02
+ * User Details Data (USR02) — CSV
+ */
+export async function uploadUSR02(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-usr02", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+}
+
+/**
+ * POST /data/load-transactionusage
+ * Transaction Usage Data — CSV
+ */
+export async function uploadTransactionUsage(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-transactionusage", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+}
+
+/**
+ * POST /data/load-tstctData
+ * Transaction Code Data (TSTCT) — CSV
+ */
+export async function uploadTSTCT(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-tstctData", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+}
+
+/**
+ * POST /data/load-flpcaData
+ * Role Fiori Data (FLPCA) — CSV
+ */
+export async function uploadFLPCA(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-flpcaData", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+}
+
+/**
+ * POST /data/load-ruleset  (FUE License RuleSet)
+ * — adjust the path if your backend uses a different route for ruleset
+ */
+export async function uploadRuleSet(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-ruleset", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+  
+}
+
+
+export async function uploadUSOBX_C(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-usobxcData", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+  
+}
+
+export async function uploadTOBJL(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/data/load-objTextData", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+  
+}
+
+
+// ─── Dispatcher — maps TABLE_CONFIG title → correct upload function ───────────
+
+export async function dispatchUpload(
+  title: string,
   systemName: string,
-  systemReleaseInfo:string,
+  systemRelease: string,
   file: File
-) => {
-  const formData = new FormData();
-  formData.append("xml_file", file); 
+): Promise<any> {
+  if (title.includes("AGR_1251"))           return uploadAGR1251(systemName, systemRelease, file);
+  if (title.includes("AGR_USERS"))          return uploadAGRUSERS(systemName, systemRelease, file);
+  if (title.includes("AGR_DEFINE"))         return uploadAGRDEFINE(systemName, systemRelease, file);
+  if (title.includes("AGR_AGRS"))           return uploadAGRAGRS(systemName, systemRelease, file);
+  if (title.includes("USR02"))              return uploadUSR02(systemName, systemRelease, file);
+  if (title.includes("Transaction Usage"))  return uploadTransactionUsage(systemName, systemRelease, file);
+  if (title.includes("Transaction Code"))   return uploadTSTCT(systemName, systemRelease, file);
+  if (title.includes("Fiori"))              return uploadFLPCA(systemName, systemRelease, file);
+  if (title.includes("RuleSet"))            return uploadRuleSet(systemName, systemRelease, file);
+  if (title.includes("USOBX_C"))            return uploadUSOBX_C(systemName, systemRelease, file);
+  if (title.includes("OBJ TEXT"))           return uploadTOBJL(systemName, systemRelease, file);
 
-  const response = await fetch(
-    `${API_BASE_URL}/data/load-license-data?client_name=${clientName}&system_name=${systemName}&system_release_info=${systemReleaseInfo}`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Failed to upload license data");
-  }
-
-  return await response.json();
-};
-
-
-export const uploadAuthData = async (
-  clientName: string,
-  systemName: string,
-  systemReleaseInfo:string,
-  file: File
-) => {
-  const formData = new FormData();
-  formData.append("csv_file", file); 
-
-  const response = await fetch(
-    `${API_BASE_URL}/data/load-auth-data?client_name=${clientName}&system_name=${systemName}&system_release_info=${systemReleaseInfo}`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Failed to upload auth data");
-  }
-
-  return await response.json();
-};
+  throw new Error(`No upload endpoint mapped for: "${title}"`);
+}
 
 
 
 
 
-export const uploadRoleFioriMapData = async (
-  clientName: string,
-  systemName: string,
-  systemReleaseInfo:string,
-  file: File
-) => {
-  const formData = new FormData();
-  formData.append("csv_file", file); 
-
-  const response = await fetch(
-    `${API_BASE_URL}/data/load-role-fiori-map-data?client_name=${clientName}&system_name=${systemName}&system_release_info=${systemReleaseInfo}`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Failed to upload fiori role map data");
-  }
-
-  return await response.json();
-};
-
-
-
-
-export const uploadMasterDerivedData = async (
-  clientName: string,
-  systemName: string,
-  systemReleaseInfo:string,
-  file: File
-) => {
-  const formData = new FormData();
-  formData.append("csv_file", file); 
-
-  const response = await fetch(
-    `${API_BASE_URL}/data/load-master-derived-role-data?client_name=${clientName}&system_name=${systemName}&system_release_info=${systemReleaseInfo}`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Failed to upload master derived role  data");
-  }
-
-  return await response.json();
-};
-
-
-export const uploadUserData = async (
-  clientName: string,
-  systemName: string,
-  systemReleaseInfo:string,
-  file: File
-) => {
-  const formData = new FormData();
-  formData.append("csv_file", file); 
-  const response = await fetch(
-    `${API_BASE_URL}/data/load-user-data?client_name=${clientName}&system_name=${systemName}&system_release_info=${systemReleaseInfo}`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Failed to upload user data");
-  }
-
-  return await response.json();
-};
-
-
-export const uploadUserRoleMapData = async (
-  clientName: string,
-  systemName: string,
-  systemReleaseInfo:string,
-  file: File
-) => {
-  const formData = new FormData();
-  formData.append("csv_file", file); 
-
-  const response = await fetch(
-    `${API_BASE_URL}/data/load-user-role-map-data?client_name=${clientName}&system_name=${systemName}&system_release_info=${systemReleaseInfo}`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Failed to upload user role map data");
-  }
-
-  return await response.json();
-};
-
-
-export const uploadUserRoleMappingData = async (
-  clientName: string,
-  systemName: string,
-  systemReleaseInfo:string,
-  file: File
-) => {
-  const formData = new FormData();
-  formData.append("csv_file", file); 
-
-  const response = await fetch(
-    `${API_BASE_URL}/data/load-user-role-mapping-data?client_name=${clientName}&system_name=${systemName}&system_release_info=${systemReleaseInfo}`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Failed to upload user role map data");
-  }
-
-  return await response.json();
-};
-
-export const uploadRoleLicenseSummaryData = async (
-  clientName: string,
-  systemName: string,
-  systemReleaseInfo:string,
-  file: File
-) => {
-  const formData = new FormData();
-  formData.append("csv_file", file); 
-
-  const response = await fetch(
-    `${API_BASE_URL}/data/load-role-lic-summary-data?client_name=${clientName}&system_name=${systemName}&system_release_info=${systemReleaseInfo}`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Failed to upload user role map data");
-  }
-
-  return await response.json();
-};
-
-
-
-export const uploadObjectFieldLicenseData = async (
-  clientName: string,
-  systemName: string,
-  systemReleaseInfo:string,
-  file: File
-) => {
-  const formData = new FormData();
-  formData.append("csv_file", file); 
-
-  const response = await fetch(
-    `${API_BASE_URL}/data/load-auth-obj-field-lic-data?client_name=${clientName}&system_name=${systemName}&system_release_info=${systemReleaseInfo}`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Failed to upload user role map data");
-  }
-
-  return await response.json();
-};
-
-
-
-
-export const fetchClients = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/manage-data/clients`);
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || "Failed to fetch clients");
-    }
-    const data = await response.json();
-    return data.map((item: { client_name: string }) => item.client_name);
-  } catch (error: any) {
-    console.error("Error fetching clients:", error);
-    throw error;
-  }
-};
-
-export const fetchSystemsByClient = async (clientId: string) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/manage-data/systems/${clientId}`);
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || `Failed to fetch systems for client ${clientId}`);
-    }
-    const data = await response.json();
-    return data.map((item: { system_name: string }) => item.system_name);
-  } catch (error: any) {
-    console.error(`Error fetching systems for client ${clientId}:`, error);
-    throw error;
-  }
-};
-
-
-
-export const downloadTableData = async (clientId: string, systemId: string, tableName: string) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/manage-data/download/${clientId}/${systemId}/${tableName}`);
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || `Failed to download ${tableName} for ${clientId} - ${systemId}`);
-    }
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${tableName}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  } catch (error: any) {
-    console.error(`Error downloading ${tableName} for ${clientId} - ${systemId}:`, error);
-    throw error;
-  }
-};
-
-export const truncateTableData = async (clientId: string, systemId: string, tableName: string) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/manage-data/delete/${clientId}/${systemId}/${tableName}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || `Failed to delete ${tableName} for ${clientId} - ${systemId}`);
-    }
-    return await response.json();
-  } catch (error: any) {
-    console.error(`Error deleting ${tableName} for ${clientId} - ${systemId}:`, error);
-    throw error;
-  }
-};
-
-export const fetchTablesForClientSystem = async (clientId: string, systemId: string) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/manage-data/tables/${clientId}/${systemId}`);
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || `Failed to fetch tables for ${clientId} - ${systemId}`);
-    }
-    return await response.json();
-  } catch (error: any) {
-    console.error(`Error fetching tables for ${clientId} - ${systemId}:`, error);
-    throw error;
-  }
-};
 
 export const fetchLogs = async () => {
   try {
