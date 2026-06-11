@@ -7,6 +7,12 @@ function buildFormData(file: File): FormData {
   return fd;
 }
 
+function buildFormData2(file: File): FormData {
+  const fd = new FormData();
+  fd.append("file", file);
+  return fd;
+}
+
 function endpoint(path: string, systemName: string, systemRelease: string): string {
   return `${API_BASE_URL}${path}?system_name=${encodeURIComponent(systemName)}&system_release_info=${encodeURIComponent(systemRelease)}`;
 }
@@ -152,6 +158,16 @@ export async function uploadTOBJL(systemName: string, systemRelease: string, fil
   
 }
 
+export async function uploadACTVTTEXT(systemName: string, systemRelease: string, file: File) {
+  const res = await fetch(endpoint("/manage-data/load-actvt_text", systemName, systemRelease), {
+    method: "POST",
+    body: buildFormData2(file),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? "Upload failed");
+  return res.json();
+  
+}
+
 
 // ─── Dispatcher — maps TABLE_CONFIG title → correct upload function ───────────
 
@@ -172,6 +188,7 @@ export async function dispatchUpload(
   if (title.includes("RuleSet"))            return uploadRuleSet(systemName, systemRelease, file);
   if (title.includes("USOBX_C"))            return uploadUSOBX_C(systemName, systemRelease, file);
   if (title.includes("OBJ TEXT"))           return uploadTOBJL(systemName, systemRelease, file);
+  if (title.includes("ACTVT TEXT"))         return uploadACTVTTEXT(systemName, systemRelease, file);
 
   throw new Error(`No upload endpoint mapped for: "${title}"`);
 }

@@ -157,11 +157,27 @@ const OptimizationRequestsTable: React.FC<OptimizationRequestsTableProps> = ({
   // const handleViewResults = (requestId: string) => {
   //   navigate(`/${requestType}-optimization-results/${requestId}`);
   // };
-  const handleViewResults = (requestId: string) => {
+//   const handleViewResults = (requestId: string) => {
+//   if (requestType === 'role') {
+//     navigate({ 
+//       to: '/role-optimization-results/$requestId',
+//       params: { requestId }, 
+//       search: { systemId: request.system_id }  // pass systemId as search param for results page to fetch sim results
+//     });
+//   } else {
+//     navigate({ 
+//       to: '/user-optimization-results/$requestId',
+//       params: { requestId } 
+//     });
+//   }
+// };
+
+const handleViewResults = (requestId: string, systemId: string) => {
   if (requestType === 'role') {
     navigate({ 
       to: '/role-optimization-results/$requestId',
-      params: { requestId } 
+      params: { requestId }, 
+      search: { systemId }  // ✅ uses the passed parameter
     });
   } else {
     navigate({ 
@@ -208,7 +224,7 @@ const OptimizationRequestsTable: React.FC<OptimizationRequestsTableProps> = ({
                     <Button 
                       size="sm" 
                       variant="outline"
-                      onClick={() => handleViewResults(request.id)}
+                      onClick={() => handleViewResults(request.id , request.system_id)}
                     >
                       <Eye className="h-4 w-4 mr-1" /> View
                     </Button>

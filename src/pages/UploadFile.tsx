@@ -85,7 +85,14 @@ const TEMPLATE_COLUMNS = {
     headers: ["AUTH_OBJ", "TEXT"],
     sample:  ["/ACCGO/APS", "Application Archiving"],
   },
+
+  "ACTVT TEXT Data": {  	
+
+    headers: ["Activity", "Text"],
+    sample:  ["01", "Create"],
+  },
 };
+	
 
 // ─── Table config — titles must match the dispatcher keys in upload.ts ────────
 const TABLE_CONFIG = [
@@ -100,6 +107,7 @@ const TABLE_CONFIG = [
   { title: "FUE License RuleSet",                  allowedExtensions: [".csv"] },
   { title: "USOBX_C Data",                         allowedExtensions: [".csv"] },
   { title: "OBJ TEXT Data",                        allowedExtensions: [".csv"] },
+  { title: "ACTVT TEXT Data",                      allowedExtensions: [".csv"] },
 ];
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────

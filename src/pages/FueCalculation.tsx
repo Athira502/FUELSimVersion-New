@@ -1,7 +1,7 @@
-
-
 // src/pages/FueCalculation.tsx
 // @ts-nocheck
+
+const API_BASE_URL = "http://127.0.0.1:8000";
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import Layout from "@/components/Layout";
@@ -158,20 +158,40 @@ const FueCalculation = () => {
     }
   };
 
+  // const reloadAllData = async () => {
+  //   const systemToUse = searchParams?.system || selectedSystem;
+  //   if (!systemToUse) {
+  //     toast({
+  //       title: "Missing Selection",
+  //       description: "Please select a system first.",
+  //       variant: "destructive",
+  //       duration: 900
+  //     });
+  //     return;
+  //   }
+  //   await Promise.all([loadDashboardData(), loadRoleDetails()]);
+  //   setDataLoaded(true);
+  // };
+
   const reloadAllData = async () => {
     const systemToUse = searchParams?.system || selectedSystem;
     if (!systemToUse) {
-      toast({
-        title: "Missing Selection",
-        description: "Please select a system first.",
-        variant: "destructive",
-        duration: 900
-      });
-      return;
+        toast({ title: "Missing Selection", description: "Please select a system first.", variant: "destructive", duration: 900 });
+        return;
     }
+
+    // Step 1: Trigger compute
+    try {
+        await fetch(`${API_BASE_URL}/data/fue/${systemToUse}/compute/all`, { method: "POST" });
+    } catch (error) {
+        toast({ title: "Compute Error", description: "Failed to run FUE computation.", variant: "destructive", duration: 900 });
+        return;
+    }
+
+    // Step 2: Load results
     await Promise.all([loadDashboardData(), loadRoleDetails()]);
     setDataLoaded(true);
-  };
+};
 
   // Auto-load data when system in URL changes or on first load with system in URL
   useEffect(() => {

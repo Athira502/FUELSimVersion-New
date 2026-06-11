@@ -189,40 +189,81 @@ const CreateSimulation = () => {
     setAllEditedObjects({}); 
     localStorage.removeItem(getAllRolesLocalStorageKey(selectedSystem)); 
 
-    try { 
-      // ✅ API only needs system name now
-      const roleData = await getRoleDetailsforSim("", selectedSystem.trim()); 
+    // try { 
+    //   // ✅ API only needs system name now
+    //   const roleData = await getRoleDetailsforSim("", selectedSystem.trim()); 
 
-      const transformedRoles: Role[] = roleData.map(role => ({ 
-        id: role.id, 
-        description: role.description, 
-        classification: role.classification, 
-        gb: role.gb, 
-        gc: role.gc, 
-        gd: role.gd, 
-        assignedUsers: role.assignedUsers, 
-        objects: [] 
-      })); 
+    //   const transformedRoles: Role[] = roleData.map(role => ({ 
+    //     id: role.id, 
+    //     description: role.description, 
+    //     classification: role.classification, 
+    //     gb: role.gb, 
+    //     gc: role.gc, 
+    //     gd: role.gd, 
+    //     assignedUsers: role.assignedUsers, 
+    //     objects: [] 
+    //   })); 
 
-      setRoles(transformedRoles); 
-      setDataLoaded(true); 
+    //   setRoles(transformedRoles); 
+    //   setDataLoaded(true); 
 
-      toast({ 
-        title: "Success", 
-        description: `Loaded ${transformedRoles.length} roles successfully.`, 
-        duration: 900,
-      }); 
-    } catch (err) { 
-      setError(err instanceof Error ? err.message : 'Failed to fetch roles'); 
-      toast({ 
-        title: "Error", 
-        description: "Failed to fetch roles. Please check your system name.", 
-        variant: "destructive", 
-        duration: 900,
-      }); 
-    } finally { 
-      setIsLoadingRoles(false); 
-    } 
+    //   toast({ 
+    //     title: "Success", 
+    //     description: `Loaded ${transformedRoles.length} roles successfully.`, 
+    //     duration: 900,
+    //   }); 
+    // } catch (err) { 
+    //   setError(err instanceof Error ? err.message : 'Failed to fetch roles'); 
+    //   toast({ 
+    //     title: "Error", 
+    //     description: "Failed to fetch roles. Please check your system name.", 
+    //     variant: "destructive", 
+    //     duration: 900,
+    //   }); 
+    // } finally { 
+    //   setIsLoadingRoles(false); 
+    // } 
+    try {
+    // ✅ NEW: reset ROLE_LIC_SIM to a fresh copy of ROLE_LIC first
+    setIsCreatingTable(true);
+    const initResult = await createSimulationTable(selectedSystem.trim());
+    console.log("Simulation table initialized:", initResult);
+    setIsCreatingTable(false);
+
+    // Then fetch roles as before
+    const roleData = await getRoleDetailsforSim("", selectedSystem.trim());
+
+    const transformedRoles: Role[] = roleData.map(role => ({
+      id: role.id,
+      description: role.description,
+      classification: role.classification,
+      gb: role.gb,
+      gc: role.gc,
+      gd: role.gd,
+      assignedUsers: role.assignedUsers,
+      objects: []
+    }));
+
+    setRoles(transformedRoles);
+    setDataLoaded(true);
+
+    toast({
+      title: "Success",
+      description: `Simulation reset (${initResult.records_copied} records) and ${transformedRoles.length} roles loaded.`,
+      duration: 1200,
+    });
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to fetch roles');
+    toast({
+      title: "Error",
+      description: err instanceof Error ? err.message : "Failed to load data. Please check your system name.",
+      variant: "destructive",
+      duration: 1500,
+    });
+  } finally {
+    setIsCreatingTable(false);
+    setIsLoadingRoles(false);
+  }
   }; 
 
   const reloadAllData = () => { 

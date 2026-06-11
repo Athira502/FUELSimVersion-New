@@ -34,6 +34,14 @@ export interface SystemCreate {
   SYSTEM_NAME: string;
   SYSTEM_RELEASE_INFO: string;
 }
+
+
+export const fetchFueHistory = async (systemName: string) => {
+    const res = await fetch(`${API_BASE_URL}/data/fue/${systemName}/history`);
+    if (!res.ok) throw new Error("Failed to fetch FUE history");
+    return res.json();
+};
+
 /**
  * GET /systems
  * Returns all systems for the dropdown.
