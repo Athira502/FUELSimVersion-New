@@ -611,7 +611,7 @@ const CreateSimulation = () => {
       selectedLicense: undefined 
     }; 
     setCurrentEditedObjects(prev => { 
-      const updated = [...prev, newObject]; 
+      const updated = [newObject, ...prev]; 
       if (selectedRole) { 
         setAllEditedObjects(prevAll => { 
           const newAll = { ...prevAll, [selectedRole.id]: updated }; 

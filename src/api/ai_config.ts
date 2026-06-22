@@ -146,3 +146,21 @@ export async function verifyApiKey(provider: string): Promise<{ message: string;
   }
   return response.json();
 }
+
+
+export async function saveApiKey(provider: string, apiKey: string) {
+  const res = await fetch(`${API_BASE_URL}/ai-config/api-keys`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider, api_key: apiKey }),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail);
+  return res.json();
+}
+
+export async function deleteApiKey(provider: string) {
+  const res = await fetch(`${API_BASE_URL}/ai-config/api-keys/${provider}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error((await res.json()).detail);
+}

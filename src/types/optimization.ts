@@ -13,20 +13,7 @@ export interface OptimizationRequest {
   datetime: string;
 }
 
-// export interface RoleOptimizationResult {
-//   id: string;
-//   request_id: string;
-//   role_id: string;
-//   role_description: string | null;
-//   auth_object: string | null;
-//   field: string | null;
-//   value: string | null;
-//   license_can_be_reduced: 'Yes' | 'No' | 'May Be'| null;
-//   insights: string | null;
-//   recommendations: string | null;
-//   explanations: string | null;
-//   created_at: string;
-// }
+
 
 export interface RoleOptimizationResult {
   id: string;

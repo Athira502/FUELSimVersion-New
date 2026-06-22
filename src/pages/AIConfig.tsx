@@ -249,6 +249,20 @@ import {
   RefreshCw,
   Circle
 } from "lucide-react";
+// import {
+//   fetchAllModelConfigs,
+//   createModelConfig,
+//   updateModelConfig,
+//   setActiveModel,
+//   deleteModelConfig,
+//   fetchApiKeyConfigs,
+//   verifyApiKey,
+//   AIModelConfig,
+//   AIApiKeyConfig,
+//   CreateModelConfigPayload,
+//   UpdateModelConfigPayload,
+// } from "@/api/ai_config";
+
 import {
   fetchAllModelConfigs,
   createModelConfig,
@@ -257,6 +271,7 @@ import {
   deleteModelConfig,
   fetchApiKeyConfigs,
   verifyApiKey,
+  saveApiKey,
   AIModelConfig,
   AIApiKeyConfig,
   CreateModelConfigPayload,
@@ -294,6 +309,26 @@ const AISettings = () => {
     loadAllData();
   }, []);
   
+
+  const [keyInputs, setKeyInputs] = useState<Record<string, string>>({});
+const [savingProvider, setSavingProvider] = useState<string | null>(null);
+
+const handleSaveApiKey = async (provider: string) => {
+  const key = keyInputs[provider]?.trim();
+  if (!key) return;
+  setSavingProvider(provider);
+  try {
+    await saveApiKey(provider, key);
+    toast({ title: "Saved", description: `${provider} API key stored securely.` });
+    setKeyInputs((prev) => ({ ...prev, [provider]: "" }));
+    loadAllData();
+  } catch (err: any) {
+    toast({ title: "Error", description: err.message, variant: "destructive" });
+  } finally {
+    setSavingProvider(null);
+  }
+};
+
   const loadAllData = async () => {
     setIsLoading(true);
     try {
@@ -763,6 +798,61 @@ const AISettings = () => {
               ) : (
                 <div className="space-y-4">
                   {apiKeyConfigs.map((config) => (
+  <div
+    key={config.id}
+    className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+  >
+    {/* existing top row, now wrapped */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <Key className="h-8 w-8 text-gray-400" />
+        <div>
+          <div className="font-medium text-lg capitalize">{config.provider}</div>
+          <div className="text-sm text-gray-500 mt-0.5">
+            Environment Variable: <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">{config.env_var_name}</code>
+          </div>
+          {config.last_verified && (
+            <div className="text-xs text-gray-400 mt-1">
+              Last verified: {new Date(config.last_verified).toLocaleString()}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        {getStatusBadge(config.status)}
+        <Button size="sm" variant="outline" onClick={() => handleVerifyApiKey(config.provider)}>
+          <RefreshCw className="h-3 w-3 mr-2" />
+          Verify
+        </Button>
+      </div>
+    </div>
+
+    {/* new row */}
+    <div className="flex gap-2 mt-3">
+      <Input
+        type="password"
+        placeholder={`Paste ${config.provider} API key`}
+        value={keyInputs[config.provider] || ""}
+        onChange={(e) =>
+          setKeyInputs((prev) => ({ ...prev, [config.provider]: e.target.value }))
+        }
+      />
+      <Button
+        size="sm"
+        onClick={() => handleSaveApiKey(config.provider)}
+        disabled={savingProvider === config.provider}
+      >
+        {savingProvider === config.provider ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          "Save"
+        )}
+      </Button>
+    </div>
+  </div>
+))}
+                  {/* {apiKeyConfigs.map((config) => (
                     <div
                       key={config.id}
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
@@ -795,7 +885,7 @@ const AISettings = () => {
                         </Button>
                       </div>
                     </div>
-                  ))}
+                  ))} */}
                   
                   <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">

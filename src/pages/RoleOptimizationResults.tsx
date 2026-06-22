@@ -292,20 +292,7 @@ const RoleOptimizationResults = () => {
             ))}
           </div>
         ) : (() => {
-          // const currentFue = passedActualFue ?? 0;
-//           const simRow = simResults[0]; // there's typically one summary row per request
-// // const currentFue  = simRow?.before_total_fue ?? passedActualFue ?? 0;
-// const currentFue = simRow?.before_total_fue ?? 0;
-// const simulatedFue = simRow?.after_total_fue  ?? 0;
-// const fueSaved     = simRow?.fue_saved        ?? 0;
-// const usersImpacted = simRow?.users_impacted  ?? 0;
-//           // Simulated FUE: prefer search param, else compute from results if any field present
-//           const simulatedFromSearch = search?.simulatedFue ? Number(search.simulatedFue) : null;
-//           // const simulatedFue =
-//           //   simulatedFromSearch ??
-//           //   results.reduce((acc: number, r: any) => acc + (Number(r.simulated_fue) || 0), 0);
-//           const isIncrease = simulatedFue > currentFue;
-//           const isDecrease = simulatedFue < currentFue;
+         
 
 const simRow = simResults[0]; // there's typically one summary row per request
 const currentFue    = simRow?.before_total_fue ?? 0;
